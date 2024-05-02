@@ -44,6 +44,7 @@ fn insert_options_enum<T: 'static>(
                 TypeInfo::Enum(info) => info,
                 _ => unreachable!(),
             };
+
             let variant_index = info.index_of(variant).unwrap();
             let field_index = match info.variant_at(variant_index).unwrap() {
                 bevy_reflect::VariantInfo::Struct(strukt) => strukt.index_of(field).unwrap(),
@@ -63,23 +64,30 @@ fn insert_options_enum<T: 'static>(
 }
 
 pub fn register_default_options(type_registry: &mut TypeRegistry) {
-    insert_options_enum::<bevy_render::color::Color>(
-        type_registry,
-        &[
-            ("Rgba", "red", &NumberOptions::<f32>::normalized()),
-            ("Rgba", "green", &NumberOptions::<f32>::normalized()),
-            ("Rgba", "blue", &NumberOptions::<f32>::normalized()),
-            ("Rgba", "alpha", &NumberOptions::<f32>::normalized()),
-            ("RgbaLinear", "red", &NumberOptions::<f32>::normalized()),
-            ("RgbaLinear", "green", &NumberOptions::<f32>::normalized()),
-            ("RgbaLinear", "blue", &NumberOptions::<f32>::normalized()),
-            ("RgbaLinear", "alpha", &NumberOptions::<f32>::normalized()),
-            ("Hsla", "hue", &NumberOptions::<f32>::between(0.0, 360.0)),
-            ("Hsla", "saturation", &NumberOptions::<f32>::normalized()),
-            ("Hsla", "lightness", &NumberOptions::<f32>::normalized()),
-            ("Hsla", "alpha", &NumberOptions::<f32>::normalized()),
-        ],
-    );
+    // insert_options_enum::<bevy_color::Color>(
+    //     type_registry,
+    //     &[
+    //         ("Srgba", "red", &NumberOptions::<f32>::normalized()),
+    //         ("Srgba", "green", &NumberOptions::<f32>::normalized()),
+    //         ("Srgba", "blue", &NumberOptions::<f32>::normalized()),
+    //         ("Srgba", "alpha", &NumberOptions::<f32>::normalized()),
+    //         ("LinearRgba", "red", &NumberOptions::<f32>::normalized()),
+    //         ("LinearRgba", "green", &NumberOptions::<f32>::normalized()),
+    //         ("LinearRgba", "blue", &NumberOptions::<f32>::normalized()),
+    //         ("LinearRgba", "alpha", &NumberOptions::<f32>::normalized()),
+    //         ("Hsla", "hue", &NumberOptions::<f32>::between(0.0, 360.0)),
+    //         ("Hsla", "saturation", &NumberOptions::<f32>::normalized()),
+    //         ("Hsla", "lightness", &NumberOptions::<f32>::normalized()),
+    //         ("Hsla", "alpha", &NumberOptions::<f32>::normalized()),
+    //     ],
+    // );
+
+    insert_options_struct::<bevy_color::Srgba>(type_registry, &[
+        ("red", &NumberOptions::<f32>::normalized()),
+        ("green", &NumberOptions::<f32>::normalized()),
+        ("blue", &NumberOptions::<f32>::normalized()),
+        ("alpha", &NumberOptions::<f32>::normalized()),
+    ]);
 
     insert_options_struct::<bevy_render::view::ColorGrading>(
         type_registry,

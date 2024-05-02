@@ -151,11 +151,13 @@ pub use egui;
 pub struct DefaultInspectorConfigPlugin;
 impl bevy_app::Plugin for DefaultInspectorConfigPlugin {
     fn build(&self, app: &mut bevy_app::App) {
-        if app.is_plugin_added::<Self>() {
-            return;
-        }
+        // if app.is_plugin_added::<Self>() {
+        //     bevy_log::info!("DefaultInspectorConfigPlugin already added, skipping");
+        //     return;
+        // }
+        // bevy_log::info!("Adding DefaultInspectorConfigPlugin");
 
-        let type_registry = app.world.resource::<bevy_ecs::prelude::AppTypeRegistry>();
+        let type_registry = app.world().resource::<bevy_ecs::prelude::AppTypeRegistry>();
         let mut type_registry = type_registry.write();
 
         inspector_options::default_options::register_default_options(&mut type_registry);

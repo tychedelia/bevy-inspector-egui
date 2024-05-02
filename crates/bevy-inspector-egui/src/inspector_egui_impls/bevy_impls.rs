@@ -1,8 +1,9 @@
 use bevy_asset::{Assets, Handle};
 use bevy_ecs::world::World;
-use bevy_ecs::{entity::Entity, system::CommandQueue};
+use bevy_ecs::{entity::Entity, world::CommandQueue};
 use bevy_render::mesh::Mesh;
-use bevy_render::{color::Color, view::RenderLayers};
+use bevy_render::{ view::RenderLayers};
+use bevy_color::Color;
 use egui::{ecolor::Hsva, Color32};
 use std::any::Any;
 
@@ -185,12 +186,12 @@ fn mesh_ui_inner(mesh: &Mesh, ui: &mut egui::Ui) {
 impl InspectorPrimitive for Color {
     fn ui(&mut self, ui: &mut egui::Ui, _: &dyn Any, _: egui::Id, _: InspectorUi<'_, '_>) -> bool {
         match self {
-            Color::Rgba {
+            Color::Srgba(bevy_color::Srgba {
                 red,
                 green,
                 blue,
                 alpha,
-            } => {
+            }) => {
                 let mut color = Color32::from_rgba_premultiplied(
                     (*red * 255.) as u8,
                     (*green * 255.) as u8,
@@ -206,12 +207,12 @@ impl InspectorPrimitive for Color {
                     return true;
                 }
             }
-            Color::RgbaLinear {
+            Color::LinearRgba(bevy_color::LinearRgba {
                 red,
                 green,
                 blue,
                 alpha,
-            } => {
+            }) => {
                 let mut color = [*red, *green, *blue, *alpha];
                 if ui
                     .color_edit_button_rgba_premultiplied(&mut color)
@@ -224,12 +225,12 @@ impl InspectorPrimitive for Color {
                     return true;
                 }
             }
-            Color::Hsla {
+            Color::Hsla(bevy_color::Hsla{
                 hue,
                 saturation,
                 lightness,
                 alpha,
-            } => {
+            }) => {
                 let mut hsva = Hsva::new(*hue, *saturation, *lightness, *alpha);
                 if ui.color_edit_button_hsva(&mut hsva).changed() {
                     *hue = hsva.h;
@@ -240,13 +241,14 @@ impl InspectorPrimitive for Color {
                 }
             }
             Color::Lcha { .. } => {
-                let [hue, saturation, lightness, alpha] = self.as_hsla_f32();
+                let bevy_color::Hsla { hue, saturation, lightness, alpha } = (*self).into();
                 let mut hsva = Hsva::new(hue, saturation, lightness, alpha);
                 if ui.color_edit_button_hsva(&mut hsva).changed() {
-                    *self = Color::hsla(hue, saturation, lightness, alpha).as_lcha();
+                    *self = Color::hsla(hue, saturation, lightness, alpha);
                     return true;
                 }
-            }
+            },
+            _ => todo!()
         }
         false
     }

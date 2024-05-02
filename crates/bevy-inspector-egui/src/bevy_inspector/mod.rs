@@ -40,7 +40,7 @@ use std::any::TypeId;
 
 use bevy_asset::{Asset, AssetServer, Assets, ReflectAsset, UntypedAssetId};
 use bevy_ecs::query::{QueryFilter, WorldQuery};
-use bevy_ecs::system::CommandQueue;
+use bevy_ecs::world::CommandQueue;
 use bevy_ecs::{component::ComponentId, prelude::*};
 use bevy_hierarchy::{Children, Parent};
 use bevy_reflect::{Reflect, TypeRegistry};
@@ -675,7 +675,7 @@ pub mod by_type_id {
     use std::any::TypeId;
 
     use bevy_asset::{AssetServer, ReflectAsset, ReflectHandle, UntypedAssetId, UntypedHandle};
-    use bevy_ecs::{prelude::*, system::CommandQueue};
+    use bevy_ecs::{prelude::*, world::CommandQueue};
     use bevy_reflect::TypeRegistry;
 
     use crate::{

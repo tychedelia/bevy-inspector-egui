@@ -162,6 +162,7 @@ impl<T: Resource + Reflect> Plugin for ResourceInspectorPlugin<T> {
             app.add_plugins(DefaultInspectorConfigPlugin);
         }
         if !app.is_plugin_added::<EguiPlugin>() {
+            bevy_log::info!("Adding EguiPlugin");
             app.add_plugins(EguiPlugin);
         }
 
