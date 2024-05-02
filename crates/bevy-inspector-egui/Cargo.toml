@@ -21,25 +21,25 @@ highlight_changes = []
 
 [dependencies]
 bevy-inspector-egui-derive = { version = "0.24.0", path = "../bevy-inspector-egui-derive" }
-bevy_app = { path = "../../../../bevyengine/bevy/crates/bevy_app" }
-bevy_asset = { path = "../../../../bevyengine/bevy/crates/bevy_asset" }
-bevy_core = { path = "../../../../bevyengine/bevy/crates/bevy_core" }
-bevy_color = { path = "../../../../bevyengine/bevy/crates/bevy_color" }
-bevy_ecs = { path = "../../../../bevyengine/bevy/crates/bevy_ecs" }
-bevy_hierarchy = { path = "../../../../bevyengine/bevy/crates/bevy_hierarchy" }
-bevy_log = { path = "../../../../bevyengine/bevy/crates/bevy_log" }
-bevy_math = { path = "../../../../bevyengine/bevy/crates/bevy_math" }
-bevy_reflect = { path = "../../../../bevyengine/bevy/crates/bevy_reflect" }
-bevy_time = { path = "../../../../bevyengine/bevy/crates/bevy_time" }
-bevy_utils = { path = "../../../../bevyengine/bevy/crates/bevy_utils" }
-bevy_window = { path = "../../../../bevyengine/bevy/crates/bevy_window" }
+bevy_app = { git = "https://github.com/bevyengine/bevy" }
+bevy_asset = { git = "https://github.com/bevyengine/bevy" }
+bevy_core = { git = "https://github.com/bevyengine/bevy" }
+bevy_color = { git = "https://github.com/bevyengine/bevy" }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy" }
+bevy_hierarchy = { git = "https://github.com/bevyengine/bevy" }
+bevy_log = { git = "https://github.com/bevyengine/bevy" }
+bevy_math = { git = "https://github.com/bevyengine/bevy" }
+bevy_reflect = { git = "https://github.com/bevyengine/bevy" }
+bevy_time = { git = "https://github.com/bevyengine/bevy" }
+bevy_utils = { git = "https://github.com/bevyengine/bevy" }
+bevy_window = { git = "https://github.com/bevyengine/bevy" }
 
-bevy_core_pipeline = { path = "../../../../bevyengine/bevy/crates/bevy_core_pipeline" }
-bevy_pbr = { path = "../../../../bevyengine/bevy/crates/bevy_pbr", optional = true }
-bevy_render = { path = "../../../../bevyengine/bevy/crates/bevy_render" }
+bevy_core_pipeline = { git = "https://github.com/bevyengine/bevy" }
+bevy_pbr = { git = "https://github.com/bevyengine/bevy", optional = true }
+bevy_render = { git = "https://github.com/bevyengine/bevy" }
 
 egui = "0.27"
-bevy_egui = { path = "../../../../mvlabat/bevy_egui" } 
+bevy_egui = { git = "https://github.com/tychedelia/bevy_egui" } 
 
 bytemuck = { version = "1.5", features = ["derive"] }
 image = { version = "0.24", default-features = false }
