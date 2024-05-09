@@ -11,6 +11,7 @@ use std::{marker::PhantomData, sync::Mutex};
 use bevy_app::{Plugin, Update};
 use bevy_asset::Asset;
 use bevy_core::TypeRegistrationPlugin;
+use bevy_ecs::schedule::FreelyMutableState;
 use bevy_ecs::{prelude::*, query::QueryFilter, schedule::BoxedCondition};
 use bevy_egui::{EguiContext, EguiPlugin};
 use bevy_reflect::Reflect;
@@ -250,7 +251,7 @@ impl<T> StateInspectorPlugin<T> {
     }
 }
 
-impl<T: States + Reflect> Plugin for StateInspectorPlugin<T> {
+impl<T: States + Reflect + FreelyMutableState> Plugin for StateInspectorPlugin<T> {
     fn build(&self, app: &mut bevy_app::App) {
         check_default_plugins(app, "StateInspectorPlugin");
 
@@ -270,7 +271,7 @@ impl<T: States + Reflect> Plugin for StateInspectorPlugin<T> {
     }
 }
 
-fn state_ui<T: States + Reflect>(world: &mut World) {
+fn state_ui<T: States + Reflect + FreelyMutableState>(world: &mut World) {
     let egui_context = world
         .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
         .get_single(world);

@@ -40,6 +40,7 @@ use std::any::TypeId;
 
 use bevy_asset::{Asset, AssetServer, Assets, ReflectAsset, UntypedAssetId};
 use bevy_ecs::query::{QueryFilter, WorldQuery};
+use bevy_ecs::schedule::FreelyMutableState;
 use bevy_ecs::world::CommandQueue;
 use bevy_ecs::{component::ComponentId, prelude::*};
 use bevy_hierarchy::{Children, Parent};
@@ -203,7 +204,10 @@ pub fn ui_for_assets<A: Asset + Reflect>(world: &mut World, ui: &mut egui::Ui) {
 }
 
 /// Display state `T` and change state on edit
-pub fn ui_for_state<T: States + Reflect>(world: &mut World, ui: &mut egui::Ui) {
+pub fn ui_for_state<T: States + Reflect + FreelyMutableState>(
+    world: &mut World,
+    ui: &mut egui::Ui,
+) {
     let type_registry = world.resource::<AppTypeRegistry>().0.clone();
     let type_registry = type_registry.read();
 
@@ -229,9 +233,11 @@ pub fn ui_for_state<T: States + Reflect>(world: &mut World, ui: &mut egui::Ui) {
     let mut current = state.get().clone();
     let changed = env.ui_for_reflect(&mut current, ui);
 
-    if changed {
-        next_state.0 = Some(current);
-    }
+    // if changed {
+    //     if let NextState::Pending(ref mut next_state) = next_state {
+    //         next_state = current;
+    //     }
+    // }
     queue.apply(world);
 }
 

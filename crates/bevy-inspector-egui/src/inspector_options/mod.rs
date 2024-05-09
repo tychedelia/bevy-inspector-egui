@@ -21,7 +21,7 @@ pub enum Target {
     WrappedVariantField {
         variant_index: usize,
         field_index: usize,
-    }
+    },
 }
 
 pub use bevy_inspector_egui_derive::InspectorOptions;

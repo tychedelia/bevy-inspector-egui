@@ -1,9 +1,9 @@
 use bevy_asset::{Assets, Handle};
+use bevy_color::Color;
 use bevy_ecs::world::World;
 use bevy_ecs::{entity::Entity, world::CommandQueue};
 use bevy_render::mesh::Mesh;
-use bevy_render::{ view::RenderLayers};
-use bevy_color::Color;
+use bevy_render::view::RenderLayers;
 use egui::{ecolor::Hsva, Color32};
 use std::any::Any;
 
@@ -225,7 +225,7 @@ impl InspectorPrimitive for Color {
                     return true;
                 }
             }
-            Color::Hsla(bevy_color::Hsla{
+            Color::Hsla(bevy_color::Hsla {
                 hue,
                 saturation,
                 lightness,
@@ -241,14 +241,19 @@ impl InspectorPrimitive for Color {
                 }
             }
             Color::Lcha { .. } => {
-                let bevy_color::Hsla { hue, saturation, lightness, alpha } = (*self).into();
+                let bevy_color::Hsla {
+                    hue,
+                    saturation,
+                    lightness,
+                    alpha,
+                } = (*self).into();
                 let mut hsva = Hsva::new(hue, saturation, lightness, alpha);
                 if ui.color_edit_button_hsva(&mut hsva).changed() {
                     *self = Color::hsla(hue, saturation, lightness, alpha);
                     return true;
                 }
-            },
-            _ => todo!()
+            }
+            _ => todo!(),
         }
         false
     }

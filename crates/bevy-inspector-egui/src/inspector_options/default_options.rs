@@ -82,12 +82,15 @@ pub fn register_default_options(type_registry: &mut TypeRegistry) {
     //     ],
     // );
 
-    insert_options_struct::<bevy_color::Srgba>(type_registry, &[
-        ("red", &NumberOptions::<f32>::normalized()),
-        ("green", &NumberOptions::<f32>::normalized()),
-        ("blue", &NumberOptions::<f32>::normalized()),
-        ("alpha", &NumberOptions::<f32>::normalized()),
-    ]);
+    insert_options_struct::<bevy_color::Srgba>(
+        type_registry,
+        &[
+            ("red", &NumberOptions::<f32>::normalized()),
+            ("green", &NumberOptions::<f32>::normalized()),
+            ("blue", &NumberOptions::<f32>::normalized()),
+            ("alpha", &NumberOptions::<f32>::normalized()),
+        ],
+    );
 
     insert_options_struct::<bevy_render::view::ColorGrading>(
         type_registry,
