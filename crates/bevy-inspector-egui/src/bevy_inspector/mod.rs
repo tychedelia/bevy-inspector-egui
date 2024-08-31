@@ -44,7 +44,7 @@ use bevy_ecs::query::{QueryFilter, WorldQuery};
 use bevy_ecs::world::CommandQueue;
 use bevy_ecs::{component::ComponentId, prelude::*};
 use bevy_hierarchy::{Children, Parent};
-use bevy_reflect::{Reflect, TypeRegistry};
+use bevy_reflect::{PartialReflect, Reflect, TypeRegistry};
 use bevy_state::state::{FreelyMutableState, NextState, State};
 use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
@@ -65,7 +65,7 @@ use crate::restricted_world_view::RestrictedWorldView;
 ///
 /// If all you're displaying is a simple value without any references into the bevy world, consider just using
 /// [`reflect_inspector::ui_for_value`](crate::reflect_inspector::ui_for_value).
-pub fn ui_for_value(value: &mut dyn Reflect, ui: &mut egui::Ui, world: &mut World) -> bool {
+pub fn ui_for_value(value: &mut dyn PartialReflect, ui: &mut egui::Ui, world: &mut World) -> bool {
     let type_registry = world.resource::<AppTypeRegistry>().0.clone();
     let type_registry = type_registry.read();
 
@@ -527,7 +527,7 @@ pub(crate) fn ui_for_entity_components(
             ui.reset_style();
 
             let inspector_changed = InspectorUi::for_bevy(type_registry, &mut cx)
-                .ui_for_reflect_with_options(value, ui, id.with(component_id), &());
+                .ui_for_reflect_with_options(value.as_partial_reflect_mut(), ui, id.with(component_id), &());
 
             if inspector_changed {
                 set_changed();
@@ -645,7 +645,7 @@ pub fn ui_for_entities_shared_components(
                         )
                     } {
                         Ok((value, mark_changed)) => {
-                            values.push(value);
+                            values.push(value.as_partial_reflect_mut());
                             mark_changeds.push(mark_changed);
                         }
                         Err(error) => {
@@ -717,7 +717,7 @@ pub mod by_type_id {
                 Err(err) => return errors::show_error(err, ui, name_of_type),
             };
 
-            let changed = env.ui_for_reflect(resource, ui);
+            let changed = env.ui_for_reflect(resource.as_partial_reflect_mut(), ui);
             if changed {
                 set_changed();
             }
@@ -777,7 +777,7 @@ pub mod by_type_id {
                 .id_source(id)
                 .show(ui, |ui| {
                     let mut env = InspectorUi::for_bevy(type_registry, &mut cx);
-                    env.ui_for_reflect_with_options(&mut *handle, ui, id, &());
+                    env.ui_for_reflect_with_options(handle.as_partial_reflect_mut(), ui, id, &());
                 });
         }
 
@@ -833,7 +833,7 @@ pub mod by_type_id {
         let mut handle = reflect_handle.typed(UntypedHandle::Weak(handle));
 
         let mut env = InspectorUi::for_bevy(type_registry, &mut cx);
-        let changed = env.ui_for_reflect_with_options(&mut *handle, ui, id, &());
+        let changed = env.ui_for_reflect_with_options(handle.as_partial_reflect_mut(), ui, id, &());
 
         queue.apply(world);
 
@@ -880,7 +880,7 @@ pub mod short_circuit {
     use std::any::{Any, TypeId};
 
     use bevy_asset::ReflectAsset;
-    use bevy_reflect::Reflect;
+    use bevy_reflect::{PartialReflect, Reflect};
 
     use crate::reflect_inspector::{Context, InspectorUi};
 
@@ -888,7 +888,7 @@ pub mod short_circuit {
 
     pub fn short_circuit(
         env: &mut InspectorUi,
-        value: &mut dyn Reflect,
+        value: &mut dyn PartialReflect,
         ui: &mut egui::Ui,
         id: egui::Id,
         options: &dyn Any,
@@ -898,7 +898,7 @@ pub mod short_circuit {
             .get_type_data::<bevy_asset::ReflectHandle>(Any::type_id(value))
         {
             let handle = reflect_handle
-                .downcast_handle_untyped(value.as_any())
+                .downcast_handle_untyped(value.try_as_reflect()?.as_any())
                 .unwrap();
             let handle_id = handle.id();
             let Some(reflect_asset) = env
@@ -952,7 +952,7 @@ pub mod short_circuit {
                 short_circuit_many: env.short_circuit_many,
             };
             return Some(restricted_env.ui_for_reflect_with_options(
-                asset_value,
+                asset_value.as_partial_reflect_mut(),
                 ui,
                 id.with("asset"),
                 options,
@@ -969,8 +969,8 @@ pub mod short_circuit {
         ui: &mut egui::Ui,
         id: egui::Id,
         options: &dyn Any,
-        values: &mut [&mut dyn Reflect],
-        projector: &dyn Fn(&mut dyn Reflect) -> &mut dyn Reflect,
+        values: &mut [&mut dyn PartialReflect],
+        projector: &dyn Fn(&mut dyn PartialReflect) -> &mut dyn PartialReflect,
     ) -> Option<bool> {
         if let Some(reflect_handle) = env
             .type_registry
@@ -1006,7 +1006,7 @@ pub mod short_circuit {
             for value in values {
                 let handle = projector(*value);
                 let handle = reflect_handle
-                    .downcast_handle_untyped(handle.as_any())
+                    .downcast_handle_untyped(handle.try_as_reflect()?.as_any())
                     .unwrap();
                 let handle_id = handle.id();
 
@@ -1030,7 +1030,7 @@ pub mod short_circuit {
                     }
                 };
 
-                new_values.push(asset_value);
+                new_values.push(asset_value.as_partial_reflect_mut());
             }
 
             let mut restricted_env = InspectorUi {
@@ -1059,7 +1059,7 @@ pub mod short_circuit {
 
     pub fn short_circuit_readonly(
         env: &mut InspectorUi,
-        value: &dyn Reflect,
+        value: &dyn PartialReflect,
         ui: &mut egui::Ui,
         id: egui::Id,
         options: &dyn Any,
@@ -1069,7 +1069,7 @@ pub mod short_circuit {
             .get_type_data::<bevy_asset::ReflectHandle>(Any::type_id(value))
         {
             let handle = reflect_handle
-                .downcast_handle_untyped(value.as_any())
+                .downcast_handle_untyped(value.try_as_reflect()?.as_any())
                 .unwrap();
             let handle_id = handle.id();
             let Some(reflect_asset) = env
@@ -1123,7 +1123,7 @@ pub mod short_circuit {
                 short_circuit_many: env.short_circuit_many,
             };
             restricted_env.ui_for_reflect_readonly_with_options(
-                asset_value,
+                asset_value.as_partial_reflect(),
                 ui,
                 id.with("asset"),
                 options,

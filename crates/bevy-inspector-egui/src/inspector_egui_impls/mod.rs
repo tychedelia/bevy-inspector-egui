@@ -1,7 +1,7 @@
 //! Custom UI implementations for specific types. Check [`InspectorPrimitive`] for an example.
 
 use crate::reflect_inspector::{errors::no_multiedit, InspectorUi};
-use bevy_reflect::{FromType, Reflect, TypePath, TypeRegistry};
+use bevy_reflect::{FromType, PartialReflect, Reflect, TypePath, TypeRegistry};
 use bevy_utils::Instant;
 use std::{
     any::{Any, TypeId},
@@ -24,8 +24,8 @@ type InspectorEguiImplFnMany = for<'a> fn(
     &dyn Any,
     egui::Id,
     InspectorUi<'_, '_>,
-    &mut [&mut dyn Reflect],
-    &dyn Fn(&mut dyn Reflect) -> &mut dyn Reflect,
+    &mut [&mut dyn PartialReflect],
+    &dyn Fn(&mut dyn PartialReflect) -> &mut dyn PartialReflect,
 ) -> bool;
 
 /// Custom UI implementation for a concrete type.
@@ -81,24 +81,24 @@ pub trait InspectorPrimitive: Reflect {
     );
 }
 
-fn ui_many_vtable<T: Reflect + PartialEq + Clone + Default + InspectorPrimitive>(
+fn ui_many_vtable<T: PartialReflect + PartialEq + Clone + Default + InspectorPrimitive>(
     ui: &mut egui::Ui,
     options: &dyn Any,
     id: egui::Id,
     env: InspectorUi<'_, '_>,
-    values: &mut [&mut dyn bevy_reflect::Reflect],
-    projector: &dyn Fn(&mut dyn bevy_reflect::Reflect) -> &mut dyn bevy_reflect::Reflect,
+    values: &mut [&mut dyn bevy_reflect::PartialReflect],
+    projector: &dyn Fn(&mut dyn bevy_reflect::PartialReflect) -> &mut dyn bevy_reflect::PartialReflect,
 ) -> bool {
     let same = crate::inspector_egui_impls::iter_all_eq(
         values
             .iter_mut()
-            .map(|value| projector(*value).downcast_ref::<T>().unwrap()),
+            .map(|value| projector(*value).try_downcast_ref::<T>().unwrap()),
     );
 
     let mut temp = same.cloned().unwrap_or_default();
     if T::ui(&mut temp, ui, options, id, env) {
         for value in values.iter_mut() {
-            let value = projector(*value).downcast_mut::<T>().unwrap();
+            let value = projector(*value).try_downcast_mut::<T>().unwrap();
             *value = temp.clone();
         }
 
@@ -200,8 +200,8 @@ impl InspectorEguiImpl {
         options: &dyn Any,
         id: egui::Id,
         env: InspectorUi<'_, '_>,
-        values: &mut [&mut dyn Reflect],
-        projector: &dyn Fn(&mut dyn Reflect) -> &mut dyn Reflect,
+        values: &mut [&mut dyn PartialReflect],
+        projector: &dyn Fn(&mut dyn PartialReflect) -> &mut dyn PartialReflect,
     ) -> bool {
         (self.fn_many)(ui, options, id, env, values, projector)
     }
@@ -212,8 +212,8 @@ fn many_unimplemented<T: Any>(
     _options: &dyn Any,
     _id: egui::Id,
     _env: InspectorUi<'_, '_>,
-    _values: &mut [&mut dyn Reflect],
-    _projector: &dyn Fn(&mut dyn Reflect) -> &mut dyn Reflect,
+    _values: &mut [&mut dyn PartialReflect],
+    _projector: &dyn Fn(&mut dyn PartialReflect) -> &mut dyn PartialReflect,
 ) -> bool {
     no_multiedit(ui, &pretty_type_name::pretty_type_name::<T>());
     false
@@ -373,19 +373,19 @@ macro_rules! many_ui {
             options: &dyn Any,
             id: egui::Id,
             env: InspectorUi<'_, '_>,
-            values: &mut [&mut dyn bevy_reflect::Reflect],
-            projector: &dyn Fn(&mut dyn bevy_reflect::Reflect) -> &mut dyn bevy_reflect::Reflect,
+            values: &mut [&mut dyn bevy_reflect::PartialReflect],
+            projector: &dyn Fn(&mut dyn bevy_reflect::PartialReflect) -> &mut dyn bevy_reflect::PartialReflect,
         ) -> bool {
             let same = $crate::inspector_egui_impls::iter_all_eq(
                 values
                     .iter_mut()
-                    .map(|value| projector(*value).downcast_ref::<$ty>().unwrap()),
+                    .map(|value| projector(*value).try_downcast_ref::<$ty>().unwrap()),
             );
 
             let mut temp = same.cloned().unwrap_or_default();
             if $inner(&mut temp, ui, options, id, env) {
                 for value in values.iter_mut() {
-                    let value = projector(*value).downcast_mut::<$ty>().unwrap();
+                    let value = projector(*value).try_downcast_mut::<$ty>().unwrap();
                     *value = temp.clone();
                 }
 
